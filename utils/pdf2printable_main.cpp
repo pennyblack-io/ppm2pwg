@@ -8,6 +8,11 @@
 #define HELPTEXT "Options from 'resolution' and onwards only affect raster output formats.\n" \
                  "Use \"-\" as filename for stdin/stdout."
 
+struct NullDeleter
+{
+    void operator()(std::ostream *) const {}
+};
+
 inline void print_error(std::string hint, std::string argHelp)
 {
   std::cerr << hint << std::endl << std::endl << argHelp << std::endl << HELPTEXT << std::endl;
@@ -85,7 +90,7 @@ int main(int argc, char** argv)
   SwitchArg<bool> antiAliasOpt(params.antiAlias, {"-aa", "--antaialias"}, "Enable antialiasing in rasterization");
 
   PosArg pdfArg(infile, "PDF-file");
-  PosArg outArg(outfile, "out-file");
+  PosArg outArg(outfile, "out-file", true);
 
   ArgGet args({&helpOpt, &verboseOpt, &formatOpt, &pagesOpt,
                &copiesOpt, /*&pageCopiesOpt,*/ &paperSizeOpt, &resolutionOpt,
@@ -94,6 +99,13 @@ int main(int argc, char** argv)
               {&pdfArg, &outArg});
 
   bool correctArgs = args.get_args(argc, argv);
+
+  // should we use stdin/stdout instead?
+  if (infile == "-" && outfile.empty())
+  {
+    outfile = "-";
+  }
+
   if(help)
   {
     std::cout << args.argHelp() << std::endl << HELPTEXT << std::endl;
@@ -176,23 +188,21 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  std::ofstream ofs;
-  std::ostream* out;
+  std::shared_ptr<std::ostream> of;
 
-  if(outfile == "-")
+  if (outfile == "-")
   {
-    out = &std::cout;
+    of = std::shared_ptr<std::ostream>(&std::cout, NullDeleter());
   }
   else
   {
-    ofs = std::ofstream(outfile, std::ios::out | std::ios::binary);
-    out = &ofs;
+    of = std::make_shared<std::ofstream>(outfile, std::ofstream::out | std::ios::binary);
   }
 
-  WriteFun writeFun([out](unsigned char const* buf, unsigned int len) -> bool
+  WriteFun writeFun([of](unsigned char const* buf, unsigned int len) -> bool
            {
-             out->write((const char*)buf, len);
-             return out->exceptions() == std::ostream::goodbit;
+             of->write((char*)buf, len);
+             return of->exceptions() == std::ostream::goodbit;
            });
 
   if(verbose)

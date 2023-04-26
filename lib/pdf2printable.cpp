@@ -42,6 +42,13 @@ void copy_raster_buffer(Bytestream& bmpBts, uint32_t* data, const PrintParameter
 void fixup_scale(double& xScale, double& yScale, double& xOffset, double& yOffset,
                  bool& rotate, double& wIn, double& hIn, const PrintParameters& params);
 
+inline std::string free_cstr(char* CStr)
+{
+    std::string tmp(CStr);
+    free(CStr);
+    return tmp;
+}
+
 inline cairo_status_t bytestream_writer(void* bts, const unsigned char* data, unsigned int length)
 {
   ((Bytestream*)bts)->putBytes(data, length);
@@ -75,20 +82,50 @@ int pdf_to_printable(std::string inFile, WriteFun writeFun, const PrintParameter
   Bytestream bmpBts;
   Bytestream outBts;
 
-  Pointer<PopplerDocument> doc(nullptr, g_object_unref);
-  GError* error = nullptr;
-
-  if(inFile == "-")
+  if (inFile != "-" && !g_path_is_absolute(inFile.c_str()))
   {
-    doc = poppler_document_new_from_fd(STDIN_FILENO, nullptr, &error);
+      std::string dir = free_cstr(g_get_current_dir());
+      inFile = free_cstr(g_build_filename(dir.c_str(), inFile.c_str(), nullptr));
+  }
+
+  std::string url("file://");
+  GError *error = nullptr;
+  std::vector<char> buffer;
+
+  if (inFile != "-")
+  {
+      url.append(inFile);
+      std::ifstream file(inFile, std::ios::binary | std::ios::ate);
+
+      if (!file)
+      {
+          std::cerr << "Failed to open file: " << inFile << std::endl;
+          return 1;
+      }
+
+      std::streamsize size = file.tellg();
+      file.seekg(0, std::ios::beg);
+      buffer.resize(size);
+
+      if (!file.read(buffer.data(), size))
+      {
+          std::cerr << "Failed to read file: " << inFile << std::endl;
+          return 1;
+      }
   }
   else
   {
-    inFile = std::filesystem::absolute(inFile);
-    std::string url("file://");
-    url.append(inFile);
-    doc = poppler_document_new_from_file(url.c_str(), nullptr, &error);
+      url.append("stdin");
+      char ch;
+      while (std::cin.get(ch))
+      {
+          buffer.push_back(ch);
+      }
   }
+
+  GBytes *bytes = g_bytes_new(buffer.data(), buffer.size());
+  Pointer<PopplerDocument> doc(poppler_document_new_from_bytes(bytes, nullptr, &error), g_object_unref);
+  g_bytes_unref(bytes);
 
   if(doc == nullptr)
   {
