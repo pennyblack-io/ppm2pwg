@@ -70,6 +70,13 @@ int main(int argc, char** argv)
               {&pdfArg, &outArg});
 
   bool correctArgs = args.get_args(argc, argv);
+
+  // should we use stdin/stdout instead?
+  if (infile == "-" && outfile.empty())
+  {
+    outfile = "-";
+  }
+
   if(help)
   {
     std::cout << args.argHelp() << std::endl << HELPTEXT << std::endl;
