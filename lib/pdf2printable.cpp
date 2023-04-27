@@ -124,7 +124,7 @@ int pdf_to_printable(std::string inFile, WriteFun writeFun, const PrintParameter
     Pointer<PopplerDocument> doc(poppler_document_new_from_bytes(bytes, nullptr, &error), g_object_unref);
     g_bytes_unref(bytes);
   #else
-    PopplerDocument *doc = poppler_document_new_from_data(buffer.data(), buffer.size(), nullptr, &error);
+    Pointer<PopplerDocument> doc(poppler_document_new_from_data(buffer.data(), buffer.size(), nullptr, &error), g_object_unref);
   #endif
 
   if(doc == nullptr)
