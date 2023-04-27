@@ -114,16 +114,16 @@ int pdf_to_printable(std::string inFile, WriteFun writeFun, const PrintParameter
   else
   {
       url.append("stdin");
-      char ch;
-      while (std::cin.get(ch))
-      {
-          buffer.push_back(ch);
-      }
+      std::copy(std::istreambuf_iterator<char>(std::cin), std::istreambuf_iterator<char>(), std::back_inserter(buffer));
   }
 
-  GBytes *bytes = g_bytes_new(buffer.data(), buffer.size());
-  Pointer<PopplerDocument> doc(poppler_document_new_from_bytes(bytes, nullptr, &error), g_object_unref);
-  g_bytes_unref(bytes);
+  #if POPPLER_CHECK_VERSION(0, 82, 0)
+    GBytes *bytes = g_bytes_new(buffer.data(), buffer.size());
+    Pointer<PopplerDocument> doc(poppler_document_new_from_bytes(bytes, nullptr, &error), g_object_unref);
+    g_bytes_unref(bytes);
+  #else
+    PopplerDocument *doc = poppler_document_new_from_data(buffer.data(), buffer.size(), nullptr, &error);
+  #endif
 
   if(doc == nullptr)
   {
