@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <memory>
 
 #include "pdf2printable.h"
 #include "argget.h"
