@@ -62,13 +62,16 @@ int PPM2PWG_MAIN(int argc, char** argv)
                                                       {"high", PrintParameters::HighQuality}},
                                                      {"-q", "--quality"},
                                                      "Quality setting in raster header (draft/normal/high)");
+  SwitchArg<std::string> mediaTypeOpt(params.mediaType, {"--media-type"}, "The media type, e.g.: LightweightCardstock");
+  SwitchArg<std::string> mediaPositionOpt(params.mediaPosition, {"-mp", "--media-pos"}, "The media position, e.g.: Top");
 
   PosArg inArg(inFile, "in-file");
   PosArg outArg(outFile, "out-file");
 
   ArgGet args({&helpOpt, &verboseOpt, &urfOpt, &pagesOpt, &paperSizeOpt,
                &resolutionOpt, &resolutionXOpt, &resolutionYOpt,
-               &duplexOpt, &tumbleOpt, &backXformOpt, &qualityOpt},
+               &duplexOpt, &tumbleOpt, &backXformOpt, &qualityOpt,
+               &mediaTypeOpt, &mediaPositionOpt},
               {&inArg, &outArg});
 
   bool correctArgs = args.get_args(argc, argv);

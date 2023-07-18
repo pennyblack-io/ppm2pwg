@@ -89,6 +89,8 @@ int main(int argc, char** argv)
                                                      {"-q", "--quality"},
                                                      "Quality setting in raster header (draft/normal/high)");
   SwitchArg<bool> antiAliasOpt(params.antiAlias, {"-aa", "--antaialias"}, "Enable antialiasing in rasterization");
+  SwitchArg<std::string> mediaTypeOpt(params.mediaType, {"-mt", "--media-type"}, "The media type, e.g.: card-stock");
+  SwitchArg<std::string> mediaPositionOpt(params.mediaPosition, {"-mp", "--media-pos"}, "The media position, e.g.: Top");
 
   PosArg pdfArg(infile, "PDF-file");
   PosArg outArg(outfile, "out-file", true);
@@ -96,7 +98,8 @@ int main(int argc, char** argv)
   ArgGet args({&helpOpt, &verboseOpt, &formatOpt, &pagesOpt,
                &copiesOpt, /*&pageCopiesOpt,*/ &paperSizeOpt, &resolutionOpt,
                &resolutionXOpt, &resolutionYOpt, &duplexOpt, &tumbleOpt,
-               &backXformOpt, &colorModeOpt, &qualityOpt, &antiAliasOpt},
+               &backXformOpt, &colorModeOpt, &qualityOpt, &antiAliasOpt,
+               &mediaTypeOpt, &mediaPositionOpt},
               {&pdfArg, &outArg});
 
   bool correctArgs = args.get_args(argc, argv);
