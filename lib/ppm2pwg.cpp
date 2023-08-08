@@ -203,6 +203,11 @@ void make_pwg_hdr(Bytestream& outBts, const PrintParameters& params, bool backsi
     outHdr.MediaPosition = media_position_from_name(params.mediaPosition);
   }
 
+  outHdr.Orientation = (params.orientation == PrintParameters::Portrait ? PwgPgHdr::Portrait
+                     : (params.orientation == PrintParameters::Landscape ? PwgPgHdr::Landscape
+                     : (params.orientation == PrintParameters::ReversePortrait ? PwgPgHdr::ReversePortrait
+                     : (params.orientation == PrintParameters::ReverseLandscape ? PwgPgHdr::ReverseLandscape
+                     : PwgPgHdr::Portrait)))); // portrait means "no rotation" and is a safe default
 
   if(verbose)
   {

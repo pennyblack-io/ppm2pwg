@@ -80,6 +80,16 @@ public:
     TwoSidedShortEdge
   };
 
+  enum Orientation
+  {
+    Portrait = 0,
+    Landscape,
+    ReversePortrait,
+    ReverseLandscape
+  };
+
+  Orientation orientation = Portrait;
+
   std::string mediaType;
   std::string mediaPosition;
 

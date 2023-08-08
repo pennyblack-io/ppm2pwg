@@ -7,6 +7,7 @@
 
 #include "ppm2pwg.h"
 #include "argget.h"
+#include "orientation.h"
 
 inline void ignore_comments(std::istream* in)
 {
@@ -64,6 +65,9 @@ int PPM2PWG_MAIN(int argc, char** argv)
                                                      "Quality setting in raster header (draft/normal/high)");
   SwitchArg<std::string> mediaTypeOpt(params.mediaType, {"--media-type"}, "The media type, e.g.: card-stock");
   SwitchArg<std::string> mediaPositionOpt(params.mediaPosition, {"-mp", "--media-pos"}, "The media position, e.g.: Top");
+  EnumSwitchArg<PrintParameters::Orientation> orientationOpt(params.orientation, ORIENTATION_MAP,
+                                                             {"-o", "--orientation"},
+                                                             "Orientation, one of: portrait (default), landscape, reverse-portrait, reverse-landscape");
 
   PosArg inArg(inFile, "in-file");
   PosArg outArg(outFile, "out-file");
@@ -71,7 +75,7 @@ int PPM2PWG_MAIN(int argc, char** argv)
   ArgGet args({&helpOpt, &verboseOpt, &urfOpt, &pagesOpt, &paperSizeOpt,
                &resolutionOpt, &resolutionXOpt, &resolutionYOpt,
                &duplexOpt, &tumbleOpt, &backXformOpt, &qualityOpt,
-               &mediaTypeOpt, &mediaPositionOpt},
+               &mediaTypeOpt, &mediaPositionOpt, &orientationOpt},
               {&inArg, &outArg});
 
   bool correctArgs = args.get_args(argc, argv);
