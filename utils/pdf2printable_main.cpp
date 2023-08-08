@@ -5,6 +5,7 @@
 
 #include "pdf2printable.h"
 #include "argget.h"
+#include "orientation.h"
 
 #define HELPTEXT "Options from 'resolution' and onwards only affect raster output formats.\n" \
                  "Use \"-\" as filename for stdin/stdout."
@@ -91,6 +92,9 @@ int main(int argc, char** argv)
   SwitchArg<bool> antiAliasOpt(params.antiAlias, {"-aa", "--antaialias"}, "Enable antialiasing in rasterization");
   SwitchArg<std::string> mediaTypeOpt(params.mediaType, {"-mt", "--media-type"}, "The media type, e.g.: card-stock");
   SwitchArg<std::string> mediaPositionOpt(params.mediaPosition, {"-mp", "--media-pos"}, "The media position, e.g.: Top");
+  EnumSwitchArg<PrintParameters::Orientation> orientationOpt(params.orientation, ORIENTATION_MAP,
+                                                                 {"-o", "--orientation"},
+                                                                 "Orientation, one of: portrait (default), landscape, reverse-portrait, reverse-landscape");
 
   PosArg pdfArg(infile, "PDF-file");
   PosArg outArg(outfile, "out-file", true);
@@ -99,7 +103,7 @@ int main(int argc, char** argv)
                &copiesOpt, /*&pageCopiesOpt,*/ &paperSizeOpt, &resolutionOpt,
                &resolutionXOpt, &resolutionYOpt, &duplexOpt, &tumbleOpt,
                &backXformOpt, &colorModeOpt, &qualityOpt, &antiAliasOpt,
-               &mediaTypeOpt, &mediaPositionOpt},
+               &mediaTypeOpt, &mediaPositionOpt, &orientationOpt},
               {&pdfArg, &outArg});
 
   bool correctArgs = args.get_args(argc, argv);
